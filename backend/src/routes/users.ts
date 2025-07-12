@@ -13,8 +13,25 @@ export interface User {
 }
 
 const usersRoute: FastifyPluginAsync = async function (fastify) {
-  // Add auth middleware to all routes in this plugin
-  fastify.addHook("preHandler", authMiddleware);
+  // Add auth middleware to all routes in this plugin (unless in test mode)
+  if (!(fastify as any).skipAuth) {
+    fastify.addHook("preHandler", authMiddleware);
+  } else {
+    // In test mode, add a mock user
+    fastify.addHook(
+      "preHandler",
+      async (request: AuthenticatedRequest, reply) => {
+        request.user = {
+          id: "test-user-1",
+          email: "test@example.com",
+          name: "Test User",
+          emailVerified: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+    );
+  }
 
   // GET /api/users - Get all users (for assignment dropdown)
   fastify.get("/", async function (request, reply) {

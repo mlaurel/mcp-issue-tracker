@@ -19,7 +19,7 @@ export interface Database {
   close: () => Promise<void>;
 }
 
-class DatabaseConnection {
+export class DatabaseConnection {
   private db: sqlite3.Database;
   public run: (sql: string, params?: any[]) => Promise<sqlite3.RunResult>;
   public get: (sql: string, params?: any[]) => Promise<any>;
@@ -95,6 +95,14 @@ export async function runMigrations(): Promise<void> {
 }
 
 export async function getDatabase(): Promise<Database> {
+  // Use test database if we're in test environment
+  if (process.env.NODE_ENV === "test") {
+    const { testDb } = await import("../tests/setup.js");
+    // Enable foreign keys for test database
+    await testDb.run("PRAGMA foreign_keys = ON");
+    return testDb;
+  }
+
   const db = await createDatabase();
   // Enable foreign keys for this connection
   await db.run("PRAGMA foreign_keys = ON");

@@ -50,7 +50,9 @@ export interface UpdateIssueRequest {
 
 export interface IssueFilters {
   status?: string;
+  priority?: string;
   assigned_user_id?: string;
+  created_by_user_id?: string;
   tag_id?: string;
   search?: string;
   limit?: string;
@@ -58,8 +60,25 @@ export interface IssueFilters {
 }
 
 const issuesRoute: FastifyPluginAsync = async function (fastify) {
-  // Add auth middleware to all routes in this plugin
-  fastify.addHook("preHandler", authMiddleware);
+  // Add auth middleware to all routes in this plugin (unless in test mode)
+  if (!(fastify as any).skipAuth) {
+    fastify.addHook("preHandler", authMiddleware);
+  } else {
+    // In test mode, add a mock user
+    fastify.addHook(
+      "preHandler",
+      async (request: AuthenticatedRequest, reply) => {
+        request.user = {
+          id: "test-user-1",
+          email: "test@example.com",
+          name: "Test User",
+          emailVerified: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+    );
+  }
 
   // GET /api/issues - Get all issues with filtering and pagination
   fastify.get<{ Querystring: IssueFilters }>(
@@ -68,7 +87,9 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
       try {
         const {
           status,
+          priority,
           assigned_user_id,
+          created_by_user_id,
           tag_id,
           search,
           limit = "50",
@@ -89,9 +110,19 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           params.push(status);
         }
 
+        if (priority) {
+          whereConditions.push("i.priority = ?");
+          params.push(priority);
+        }
+
         if (assigned_user_id) {
           whereConditions.push("i.assigned_user_id = ?");
           params.push(assigned_user_id);
+        }
+
+        if (created_by_user_id) {
+          whereConditions.push("i.created_by_user_id = ?");
+          params.push(created_by_user_id);
         }
 
         if (search) {
@@ -125,10 +156,8 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           i.created_by_user_id,
           i.created_at,
           i.updated_at,
-          au.id as assigned_user_id,
           au.name as assigned_user_name,
           au.email as assigned_user_email,
-          cu.id as created_by_user_id,
           cu.name as created_by_user_name,
           cu.email as created_by_user_email
         FROM issues i
@@ -181,6 +210,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           title: issue.title,
           description: issue.description,
           status: issue.status,
+          priority: issue.priority,
           assigned_user_id: issue.assigned_user_id,
           created_by_user_id: issue.created_by_user_id,
           created_at: issue.created_at,

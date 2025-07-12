@@ -10,7 +10,7 @@ const db = new Database(path.join(__dirname, "..", "..", "database.sqlite"));
 
 const authConfig = {
   database: db,
-  // Remove baseURL to let BetterAuth use default patterns
+  baseURL: "http://localhost:3000/api/auth",
   emailAndPassword: {
     enabled: true,
   },
