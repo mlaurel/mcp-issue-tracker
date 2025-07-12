@@ -35,8 +35,8 @@
 
 ### API Routes - Users
 
-- [ ] GET /api/users (for assignment dropdown)
-- [ ] Add user validation middleware
+- [x] GET /api/users (for assignment dropdown) - implemented and tested
+- [x] Add user validation middleware - auth middleware added
 
 ### API Routes - Tags
 

@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { auth } from "./auth.js";
+import usersRoute from "./routes/users.js";
 
 const fastify = Fastify({
   logger: true,
@@ -69,6 +70,9 @@ fastify.get("/", async function handler(request, reply) {
 fastify.get("/api/health", async function handler(request, reply) {
   return { status: "ok", timestamp: new Date().toISOString() };
 });
+
+// Register API routes
+fastify.register(usersRoute, { prefix: "/api/users" });
 
 // Start the server
 try {
