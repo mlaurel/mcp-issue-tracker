@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { auth } from "./auth.js";
 import usersRoute from "./routes/users.js";
+import tagsRoute from "./routes/tags.js";
 
 const fastify = Fastify({
   logger: true,
@@ -73,6 +74,7 @@ fastify.get("/api/health", async function handler(request, reply) {
 
 // Register API routes
 fastify.register(usersRoute, { prefix: "/api/users" });
+fastify.register(tagsRoute, { prefix: "/api/tags" });
 
 // Start the server
 try {

@@ -40,10 +40,10 @@
 
 ### API Routes - Tags
 
-- [ ] GET /api/tags
-- [ ] POST /api/tags
-- [ ] DELETE /api/tags/:id
-- [ ] Add tag validation (unique names)
+- [x] GET /api/tags - implemented and tested
+- [x] POST /api/tags - implemented with validation and duplicate prevention
+- [x] DELETE /api/tags/:id - implemented with usage protection
+- [x] Add tag validation (unique names) - case-insensitive uniqueness enforced
 
 ### API Routes - Issues
 
