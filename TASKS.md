@@ -47,19 +47,21 @@
 
 ### API Routes - Issues
 
-- [ ] GET /api/issues (with filtering query params)
-- [ ] POST /api/issues
-- [ ] GET /api/issues/:id
-- [ ] PUT /api/issues/:id
-- [ ] DELETE /api/issues/:id
-- [ ] Add issue validation middleware
+- [x] GET /api/issues (with filtering query params) - implemented with status, user, tag, search filters and pagination
+- [x] POST /api/issues - implemented with full validation and tag assignment
+- [x] GET /api/issues/:id - implemented with complete user and tag details
+- [x] PUT /api/issues/:id - implemented with partial updates and tag management
+- [x] DELETE /api/issues/:id - implemented with proper cleanup
+- [x] Add issue validation middleware - comprehensive validation added
 
 ### API Middleware & Utils
 
-- [ ] Error handling middleware
-- [ ] Request validation middleware
-- [ ] CORS configuration
-- [ ] Database connection utilities
+- [x] Error handling middleware - comprehensive error handling with custom error classes, SQLite error mapping, dev/prod modes
+- [x] Request validation middleware - validation schemas for all endpoints with common patterns
+- [x] Rate limiting middleware - configurable rate limits with in-memory store, API quota headers
+- [x] Database connection utilities - connection management, transactions, query builder, pagination
+- [x] Health check endpoints - /health, /health/ready, /health/live with database and memory monitoring
+- [x] CORS configuration - properly configured for frontend development
 
 ## Frontend Development
 

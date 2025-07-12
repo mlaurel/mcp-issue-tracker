@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Create the database connection
 const db = new Database(path.join(__dirname, "..", "..", "database.sqlite"));
 
-export const auth = betterAuth({
+const authConfig = {
   database: db,
   emailAndPassword: {
     enabled: true,
@@ -24,4 +24,11 @@ export const auth = betterAuth({
     "http://localhost:5174",
     "http://localhost:3000",
   ],
-});
+};
+
+// Create auth instance and export its handler
+const authInstance = betterAuth(authConfig);
+export const auth = {
+  handler: authInstance.handler,
+  api: authInstance.api,
+};
