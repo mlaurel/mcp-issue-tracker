@@ -1,8 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { AuthProvider, ProtectedRoute } from "@/components/auth";
 import Layout from "@/components/layout/Layout";
 import HomePage from "@/pages/HomePage";
-import IssuesPage from "@/pages/IssuesPage";
+import IssueListPage from "@/pages/IssueListPage";
+import IssueDetailPage from "@/pages/IssueDetailPage";
+import CreateIssuePage from "@/pages/CreateIssuePage";
+import EditIssuePage from "@/pages/EditIssuePage";
 import SignInPage from "@/pages/SignInPage";
 import SignUpPage from "@/pages/SignUpPage";
 import NotFoundPage from "@/pages/NotFoundPage";
@@ -18,7 +21,31 @@ function App() {
               path="/issues" 
               element={
                 <ProtectedRoute>
-                  <IssuesPage />
+                  <IssueListPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/issues/new" 
+              element={
+                <ProtectedRoute>
+                  <CreateIssuePage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/issues/:id" 
+              element={
+                <ProtectedRoute>
+                  <IssueDetailPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/issues/:id/edit" 
+              element={
+                <ProtectedRoute>
+                  <EditIssuePage />
                 </ProtectedRoute>
               } 
             />

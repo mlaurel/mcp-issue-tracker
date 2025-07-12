@@ -8,7 +8,8 @@ import type {
   IssueFilters,
 } from "@/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -34,22 +35,22 @@ api.interceptors.response.use(
 // Auth API
 export const authApi = {
   signUp: async (data: { email: string; password: string; name: string }) => {
-    const response = await api.post("/api/auth/sign-up/email", data);
+    const response = await api.post("/auth/sign-up/email", data);
     return response.data;
   },
 
   signIn: async (data: { email: string; password: string }) => {
-    const response = await api.post("/api/auth/sign-in/email", data);
+    const response = await api.post("/auth/sign-in/email", data);
     return response.data;
   },
 
   signOut: async () => {
-    const response = await api.post("/api/auth/sign-out", {});
+    const response = await api.post("/auth/sign-out", {});
     return response.data;
   },
 
   getSession: async () => {
-    const response = await api.get("/api/auth/get-session");
+    const response = await api.get("/auth/get-session");
     return response.data;
   },
 };
@@ -57,12 +58,12 @@ export const authApi = {
 // Users API
 export const usersApi = {
   getUsers: async (): Promise<ApiResponse<User[]>> => {
-    const response = await api.get("/api/users");
+    const response = await api.get("/users");
     return response.data;
   },
 
   getUser: async (id: string): Promise<ApiResponse<User>> => {
-    const response = await api.get(`/api/users/${id}`);
+    const response = await api.get(`/users/${id}`);
     return response.data;
   },
 };
@@ -70,7 +71,7 @@ export const usersApi = {
 // Tags API
 export const tagsApi = {
   getTags: async (): Promise<ApiResponse<Tag[]>> => {
-    const response = await api.get("/api/tags");
+    const response = await api.get("/tags");
     return response.data;
   },
 
@@ -78,12 +79,12 @@ export const tagsApi = {
     name: string;
     color: string;
   }): Promise<ApiResponse<Tag>> => {
-    const response = await api.post("/api/tags", data);
+    const response = await api.post("/tags", data);
     return response.data;
   },
 
   deleteTag: async (id: number): Promise<ApiResponse<void>> => {
-    const response = await api.delete(`/api/tags/${id}`);
+    const response = await api.delete(`/tags/${id}`);
     return response.data;
   },
 };
@@ -93,12 +94,12 @@ export const issuesApi = {
   getIssues: async (
     filters?: IssueFilters
   ): Promise<PaginatedResponse<Issue>> => {
-    const response = await api.get("/api/issues", { params: filters });
+    const response = await api.get("/issues", { params: filters });
     return response.data;
   },
 
   getIssue: async (id: number): Promise<ApiResponse<Issue>> => {
-    const response = await api.get(`/api/issues/${id}`);
+    const response = await api.get(`/issues/${id}`);
     return response.data;
   },
 
@@ -109,7 +110,7 @@ export const issuesApi = {
     assigned_user_id?: string;
     tag_ids?: number[];
   }): Promise<ApiResponse<Issue>> => {
-    const response = await api.post("/api/issues", data);
+    const response = await api.post("/issues", data);
     return response.data;
   },
 
@@ -124,12 +125,12 @@ export const issuesApi = {
       tag_ids?: number[];
     }>
   ): Promise<ApiResponse<Issue>> => {
-    const response = await api.put(`/api/issues/${id}`, data);
+    const response = await api.put(`/issues/${id}`, data);
     return response.data;
   },
 
   deleteIssue: async (id: number): Promise<ApiResponse<void>> => {
-    const response = await api.delete(`/api/issues/${id}`);
+    const response = await api.delete(`/issues/${id}`);
     return response.data;
   },
 };

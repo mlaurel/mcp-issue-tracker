@@ -106,9 +106,9 @@ export const rateLimits = {
     message: "API rate limit exceeded. Please slow down your requests.",
   }),
 
-  // Strict rate limit for authentication endpoints
+  // Reasonable rate limit for authentication endpoints
   auth: createRateLimitMiddleware({
-    max: 10, // 10 requests
+    max: 50, // 50 requests (increased from 30)
     window: 15 * 60 * 1000, // per 15 minutes
     message:
       "Authentication rate limit exceeded. Please wait before trying again.",

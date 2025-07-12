@@ -10,14 +10,9 @@ const db = new Database(path.join(__dirname, "..", "..", "database.sqlite"));
 
 const authConfig = {
   database: db,
+  // Remove baseURL to let BetterAuth use default patterns
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
-    autoSignIn: true,
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
   },
   trustedOrigins: [
     "http://localhost:5173",
@@ -28,6 +23,7 @@ const authConfig = {
 
 // Create auth instance and export its handler
 const authInstance = betterAuth(authConfig);
+
 export const auth = {
   handler: authInstance.handler,
   api: authInstance.api,

@@ -58,7 +58,7 @@
 
 - [x] Error handling middleware - comprehensive error handling with custom error classes, SQLite error mapping, dev/prod modes
 - [x] Request validation middleware - validation schemas for all endpoints with common patterns
-- [x] Rate limiting middleware - configurable rate limits with in-memory store, API quota headers
+- [x] ~~Rate limiting middleware~~ - removed per user request
 - [x] Database connection utilities - connection management, transactions, query builder, pagination
 - [x] Health check endpoints - /health, /health/ready, /health/live with database and memory monitoring
 - [x] CORS configuration - properly configured for frontend development
@@ -82,22 +82,22 @@
 
 ### Core Components
 
-- [ ] Create Issue component (display card)
-- [ ] Create IssueForm component (create/edit)
-- [ ] Create TagBadge component
-- [ ] Create StatusBadge component
-- [ ] Create UserAvatar component
+- [x] Create Issue component (display card) - IssueCard component with comprehensive issue display including metadata, tags, users, actions
+- [x] Create IssueForm component (create/edit) - Form component with validation, tag management, user assignment, create/edit modes
+- [x] Create TagBadge component - Customizable tag badges with color support and optional remove functionality
+- [x] Create StatusBadge component - Status-specific badge styling for open/in_progress/resolved/closed states
+- [x] Create UserAvatar component - User avatar with initials fallback, consistent color generation, size variants
 
 ### Main Pages
 
-- [ ] Build IssueList page with filtering:
-  - [ ] Filter by assigned user
-  - [ ] Filter by status
-  - [ ] Filter by tag
-  - [ ] Search functionality
-- [ ] Build IssueDetail page
-- [ ] Build CreateIssue page
-- [ ] Build EditIssue page
+- [x] Build IssueList page with filtering:
+  - [x] Filter by assigned user - Select dropdown with user avatars and names
+  - [x] Filter by status - Select dropdown for open/in_progress/resolved/closed
+  - [x] Filter by tag - Select dropdown with tag badges
+  - [x] Search functionality - Text input for title/description search
+- [x] Build IssueDetail page - Comprehensive issue display with sidebar metadata, timeline, and actions
+- [x] Build CreateIssue page - Form page for creating new issues with validation and navigation
+- [x] Build EditIssue page - Form page for editing existing issues with pre-populated data
 
 ### UI Features
 

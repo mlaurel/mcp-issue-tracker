@@ -5,7 +5,6 @@ import usersRoute from "./routes/users.js";
 import tagsRoute from "./routes/tags.js";
 import issuesRoute from "./routes/issues.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { rateLimits } from "./middleware/rateLimit.js";
 import {
   healthCheckHandler,
   readinessCheckHandler,
@@ -27,74 +26,66 @@ await fastify.register(cors, {
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 });
 
-// Apply rate limiting to all routes except health checks
+// Register BetterAuth routes
+fastify.register(
+  async function (fastify) {
+    // Create a more direct BetterAuth integration
+    fastify.all("/*", async (request, reply) => {
+      try {
+        // Create a test request to see what BetterAuth expects
+        const testUrl = `http://localhost:3000${request.url}`;
+
+        // Try to create the request object
+        const authRequest = new Request(testUrl, {
+          method: request.method,
+          headers: {
+            "content-type": "application/json",
+            ...request.headers,
+          } as any,
+          body: request.body ? JSON.stringify(request.body) : null,
+        });
+
+        // Call BetterAuth handler directly
+        const authResponse = await auth.handler(authRequest);
+
+        // If we get back text content, log it
+        const responseText = authResponse.body
+          ? await authResponse.text()
+          : null;
+
+        // Set status
+        reply.status(authResponse.status);
+
+        // Copy headers
+        authResponse.headers.forEach((value, key) => {
+          reply.header(key, value);
+        });
+
+        // Send response
+        reply.send(responseText);
+      } catch (error) {
+        console.error("Auth error:", error);
+        reply.status(500).send({
+          error: "Authentication error",
+          code: "AUTH_ERROR",
+          details: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    });
+  },
+  { prefix: "/api/auth" }
+);
+
+// Test route
+fastify.get("/", async function handler(request, reply) {
+  return { hello: "world" };
+});
+
+// Register API routes
 fastify.register(async function (fastify) {
-  // Add rate limiting hooks
-  fastify.addHook("preHandler", rateLimits.api);
-
-  // Register BetterAuth routes - handle all auth endpoints
-  fastify.register(
-    async function (fastify) {
-      // Add stricter rate limiting for auth routes
-      fastify.addHook("preHandler", rateLimits.auth);
-
-      fastify.all("/*", async (request, reply) => {
-        try {
-          // Construct request URL
-          const url = new URL(request.url, `http://${request.headers.host}`);
-
-          // Convert Fastify headers to standard Headers object
-          const headers = new Headers();
-          Object.entries(request.headers).forEach(([key, value]) => {
-            if (value) {
-              const headerValue = Array.isArray(value) ? value[0] : value;
-              if (typeof headerValue === "string") {
-                headers.append(key, headerValue);
-              }
-            }
-          });
-
-          // Create Fetch API-compatible request
-          const requestBody = request.body
-            ? JSON.stringify(request.body)
-            : null;
-          const req = new Request(url.toString(), {
-            method: request.method,
-            headers,
-            body: requestBody,
-          });
-
-          // Process authentication request
-          const response = await auth.handler(req);
-
-          // Forward response to client
-          reply.status(response.status);
-          response.headers.forEach((value, key) => reply.header(key, value));
-          reply.send(response.body ? await response.text() : null);
-        } catch (error) {
-          fastify.log.error("Authentication Error:", error);
-          reply.status(500).send({
-            error: "Internal authentication error",
-            code: "AUTH_FAILURE",
-          });
-        }
-      });
-    },
-    { prefix: "/api/auth" }
-  );
-
-  // Test route
-  fastify.get("/", async function handler(request, reply) {
-    return { hello: "world" };
-  });
-
-  // Register API routes with appropriate rate limiting
-  fastify.register(async function (fastify) {
-    fastify.addHook("preHandler", rateLimits.api);
-    fastify.register(usersRoute, { prefix: "/api/users" });
-    fastify.register(tagsRoute, { prefix: "/api/tags" });
-    fastify.register(issuesRoute, { prefix: "/api/issues" });
-  });
+  fastify.register(usersRoute, { prefix: "/api/users" });
+  fastify.register(tagsRoute, { prefix: "/api/tags" });
+  fastify.register(issuesRoute, { prefix: "/api/issues" });
 });
 
 // Health check endpoints (no rate limiting)
@@ -110,7 +101,6 @@ fastify.get("/api/health", async function handler(request, reply) {
 // Start the server
 try {
   await fastify.listen({ port: 3000, host: "0.0.0.0" });
-  console.log("Backend server running on http://localhost:3000");
 } catch (err) {
   fastify.log.error(err);
   process.exit(1);
