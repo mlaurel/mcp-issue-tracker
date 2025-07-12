@@ -20,7 +20,7 @@ export interface Issue {
   id: number;
   title: string;
   description: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
+  status: "not_started" | "in_progress" | "done";
   priority: "low" | "medium" | "high" | "urgent";
   created_by_user_id: string;
   assigned_user_id?: string;

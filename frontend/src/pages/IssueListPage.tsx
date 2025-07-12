@@ -71,8 +71,17 @@ export default function IssueListPage() {
       setLoading(true);
       setError(null);
 
+      // Clean filters - remove "all" values and convert "unassigned" to empty string
+      const cleanedFilters = {
+        ...filters,
+        status: filters.status === "all" ? "" : filters.status,
+        assignedUserId: filters.assignedUserId === "all" ? "" : 
+                       filters.assignedUserId === "unassigned" ? "" : filters.assignedUserId,
+        tagId: filters.tagId === "all" ? "" : filters.tagId,
+      };
+
       const [issuesResponse, usersResponse, tagsResponse] = await Promise.all([
-        issuesApi.getIssues(filters),
+        issuesApi.getIssues(cleanedFilters),
         usersApi.getUsers(),
         tagsApi.getTags(),
       ]);
@@ -156,7 +165,7 @@ export default function IssueListPage() {
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
@@ -176,7 +185,7 @@ export default function IssueListPage() {
                   <SelectValue placeholder="All users" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All users</SelectItem>
+                  <SelectItem value="all">All users</SelectItem>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
@@ -201,7 +210,7 @@ export default function IssueListPage() {
                   <SelectValue placeholder="All tags" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All tags</SelectItem>
+                  <SelectItem value="all">All tags</SelectItem>
                   {tags.map((tag) => (
                     <SelectItem key={tag.id} value={tag.id.toString()}>
                       <TagBadge tag={tag} variant="outline" />

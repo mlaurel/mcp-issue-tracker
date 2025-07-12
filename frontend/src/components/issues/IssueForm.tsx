@@ -45,8 +45,8 @@ export default function IssueForm({
     title: issue?.title || "",
     description: issue?.description || "",
     priority: issue?.priority || "medium",
-    status: issue?.status || "open",
-    assigned_user_id: issue?.assigned_user_id || "",
+    status: issue?.status || "not_started",
+    assigned_user_id: issue?.assigned_user_id || "unassigned",
     tag_ids: issue?.tags?.map(tag => tag.id) || [],
   });
   
@@ -81,7 +81,12 @@ export default function IssueForm({
     }
 
     try {
-      await onSubmit(formData);
+      // Clean the form data before submission
+      const cleanedFormData = {
+        ...formData,
+        assigned_user_id: formData.assigned_user_id === "unassigned" ? undefined : formData.assigned_user_id || undefined,
+      };
+      await onSubmit(cleanedFormData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save issue");
     }
@@ -194,10 +199,9 @@ export default function IssueForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="not_started">Not Started</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -218,7 +222,7 @@ export default function IssueForm({
                 <SelectValue placeholder="Select a user" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">

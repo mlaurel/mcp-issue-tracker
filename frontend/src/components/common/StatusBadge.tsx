@@ -7,9 +7,9 @@ interface StatusBadgeProps {
 }
 
 const statusConfig = {
-  open: {
+  not_started: {
     variant: "default" as const,
-    label: "Open",
+    label: "Not Started",
     className: "bg-green-100 text-green-800 hover:bg-green-200",
   },
   in_progress: {
@@ -17,15 +17,10 @@ const statusConfig = {
     label: "In Progress",
     className: "bg-blue-100 text-blue-800 hover:bg-blue-200",
   },
-  resolved: {
+  done: {
     variant: "outline" as const,
-    label: "Resolved",
+    label: "Done",
     className: "bg-purple-100 text-purple-800 hover:bg-purple-200",
-  },
-  closed: {
-    variant: "secondary" as const,
-    label: "Closed",
-    className: "bg-gray-100 text-gray-800 hover:bg-gray-200",
   },
 };
 

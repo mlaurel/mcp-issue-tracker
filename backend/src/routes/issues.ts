@@ -7,6 +7,7 @@ export interface Issue {
   title: string;
   description: string | null;
   status: "not_started" | "in_progress" | "done";
+  priority: "low" | "medium" | "high" | "urgent";
   assigned_user_id: string | null;
   created_by_user_id: string;
   created_at: string;
@@ -33,6 +34,7 @@ export interface CreateIssueRequest {
   title: string;
   description?: string;
   status?: "not_started" | "in_progress" | "done";
+  priority?: "low" | "medium" | "high" | "urgent";
   assigned_user_id?: string;
   tag_ids?: number[];
 }
@@ -41,6 +43,7 @@ export interface UpdateIssueRequest {
   title?: string;
   description?: string;
   status?: "not_started" | "in_progress" | "done";
+  priority?: "low" | "medium" | "high" | "urgent";
   assigned_user_id?: string;
   tag_ids?: number[];
 }
@@ -117,6 +120,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           i.title,
           i.description,
           i.status,
+          i.priority,
           i.assigned_user_id,
           i.created_by_user_id,
           i.created_at,
@@ -237,6 +241,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           title,
           description,
           status = "not_started",
+          priority = "medium",
           assigned_user_id,
           tag_ids = [],
         } = request.body;
@@ -257,6 +262,16 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
             success: false,
             error: "Validation error",
             message: `Status must be one of: ${validStatuses.join(", ")}`,
+          });
+        }
+
+        // Validate priority
+        const validPriorities = ["low", "medium", "high", "urgent"];
+        if (!validPriorities.includes(priority)) {
+          return reply.status(400).send({
+            success: false,
+            error: "Validation error",
+            message: `Priority must be one of: ${validPriorities.join(", ")}`,
           });
         }
 
@@ -308,12 +323,13 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
 
         // Create the issue
         const result = await db.run(
-          `INSERT INTO issues (title, description, status, assigned_user_id, created_by_user_id) 
-         VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO issues (title, description, status, priority, assigned_user_id, created_by_user_id) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
           [
             trimmedTitle,
             description || null,
             status,
+            priority || "medium",
             assigned_user_id || null,
             currentUser.id,
           ]
@@ -340,6 +356,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           i.title,
           i.description,
           i.status,
+          i.priority,
           i.assigned_user_id,
           i.created_by_user_id,
           i.created_at,
@@ -428,6 +445,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           i.title,
           i.description,
           i.status,
+          i.priority,
           i.assigned_user_id,
           i.created_by_user_id,
           i.created_at,
@@ -515,14 +533,21 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           });
         }
 
-        const { title, description, status, assigned_user_id, tag_ids } =
-          request.body;
+        const {
+          title,
+          description,
+          status,
+          priority,
+          assigned_user_id,
+          tag_ids,
+        } = request.body;
 
         // Validate at least one field is being updated
         if (
           !title &&
           description === undefined &&
           !status &&
+          !priority &&
           assigned_user_id === undefined &&
           !tag_ids
         ) {
@@ -573,6 +598,18 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           }
         }
 
+        if (priority !== undefined) {
+          const validPriorities = ["low", "medium", "high", "urgent"];
+          if (!validPriorities.includes(priority)) {
+            await db.close();
+            return reply.status(400).send({
+              success: false,
+              error: "Validation error",
+              message: `Priority must be one of: ${validPriorities.join(", ")}`,
+            });
+          }
+        }
+
         if (assigned_user_id !== undefined && assigned_user_id !== null) {
           const userExists = await db.get("SELECT id FROM user WHERE id = ?", [
             assigned_user_id,
@@ -619,6 +656,10 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           updateFields.push("status = ?");
           updateParams.push(status);
         }
+        if (priority !== undefined) {
+          updateFields.push("priority = ?");
+          updateParams.push(priority);
+        }
         if (assigned_user_id !== undefined) {
           updateFields.push("assigned_user_id = ?");
           updateParams.push(assigned_user_id);
@@ -659,6 +700,7 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           i.title,
           i.description,
           i.status,
+          i.priority,
           i.assigned_user_id,
           i.created_by_user_id,
           i.created_at,

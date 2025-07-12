@@ -44,7 +44,7 @@ export default function IssueCard({
   onEdit,
   onDelete 
 }: IssueCardProps) {
-  const priorityStyle = priorityConfig[issue.priority];
+  const priorityStyle = priorityConfig[issue.priority] || priorityConfig.low;
   
   // Format date for display
   const formatDate = (dateString: string) => {
