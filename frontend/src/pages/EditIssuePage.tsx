@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { IssueForm, type IssueFormData } from "@/components/issues";
-import { api } from "@/lib/api";
+import { usersApi, tagsApi, issuesApi } from "@/lib/api";
 import type { Issue, User, Tag } from "@/types";
 
 export default function EditIssuePage() {
@@ -24,11 +24,12 @@ export default function EditIssuePage() {
 
       try {
         const [issueResponse, usersResponse, tagsResponse] = await Promise.all([
-          api.get(`/issues/${id}`),
-          api.get("/users"),
-          api.get("/tags"),
+          issuesApi.getIssue(parseInt(id)),
+          usersApi.getUsers(),
+          tagsApi.getTags(),
         ]);
 
+        // API wrapper functions already return the correct structure
         setIssue(issueResponse.data);
         setUsers(usersResponse.data || []);
         setTags(tagsResponse.data || []);
@@ -40,6 +41,8 @@ export default function EditIssuePage() {
         } else {
           setError("Failed to load issue data. Please try again.");
         }
+        setUsers([]);
+        setTags([]);
       } finally {
         setLoading(false);
       }
@@ -53,7 +56,7 @@ export default function EditIssuePage() {
 
     try {
       setSubmitting(true);
-      const response = await api.put(`/issues/${issue.id}`, data);
+      const response = await issuesApi.updateIssue(issue.id, data);
       const updatedIssue = response.data;
       
       // Navigate to the updated issue detail page

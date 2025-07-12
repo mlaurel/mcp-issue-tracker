@@ -62,7 +62,7 @@ export default function IssueForm({
 
   // Update selected tags when tag_ids change
   useEffect(() => {
-    const newSelectedTags = tags.filter(tag => 
+    const newSelectedTags = (tags || []).filter(tag => 
       formData.tag_ids.includes(tag.id)
     );
     setSelectedTags(newSelectedTags);
@@ -233,7 +233,7 @@ export default function IssueForm({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
-                {users.map((user) => (
+                {(users || []).map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     <div className="flex items-center gap-2">
                       <UserAvatar user={user} size="sm" />
@@ -266,7 +266,7 @@ export default function IssueForm({
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Available tags:</p>
               <div className="flex flex-wrap gap-2">
-                {tags.filter(tag => !formData.tag_ids.includes(tag.id)).map((tag) => (
+                {(tags || []).filter(tag => !formData.tag_ids.includes(tag.id)).map((tag) => (
                   <button
                     key={tag.id}
                     type="button"

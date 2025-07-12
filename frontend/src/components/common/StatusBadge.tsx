@@ -25,7 +25,7 @@ const statusConfig = {
 };
 
 export default function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || statusConfig.not_started; // fallback to not_started
 
   return (
     <Badge 

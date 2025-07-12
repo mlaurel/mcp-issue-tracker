@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 import { getDatabase } from "./database.js";
-import bcrypt from "bcrypt";
-
-const SALT_ROUNDS = 10;
 
 async function seedDatabase() {
   const db = await getDatabase();
@@ -14,33 +11,32 @@ async function seedDatabase() {
     await db.run("DELETE FROM issue_tags");
     await db.run("DELETE FROM issues");
     await db.run("DELETE FROM tags");
-    await db.run("DELETE FROM users");
+    await db.run("DELETE FROM session");
+    await db.run("DELETE FROM account");
+    await db.run("DELETE FROM verification");
+    await db.run("DELETE FROM user");
 
     // Reset auto-increment counters
     await db.run(
-      'DELETE FROM sqlite_sequence WHERE name IN ("users", "issues", "tags")'
+      'DELETE FROM sqlite_sequence WHERE name IN ("issues", "tags")'
     );
 
-    // Create sample users
+    // Create sample users in BetterAuth user table
     const users = [
-      { email: "john@example.com", name: "John Doe", password: "password123" },
-      {
-        email: "jane@example.com",
-        name: "Jane Smith",
-        password: "password123",
-      },
-      { email: "admin@example.com", name: "Admin User", password: "admin123" },
-      { email: "dev@example.com", name: "Developer", password: "dev123" },
+      { id: "john123", email: "john@example.com", name: "John Doe" },
+      { id: "jane456", email: "jane@example.com", name: "Jane Smith" },
+      { id: "admin789", email: "admin@example.com", name: "Admin User" },
+      { id: "dev101", email: "dev@example.com", name: "Developer" },
     ];
 
-    const userIds: number[] = [];
+    const userIds: string[] = [];
     for (const user of users) {
-      const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
-      const result = await db.run(
-        "INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?)",
-        [user.email, user.name, hashedPassword]
+      const now = new Date().toISOString();
+      await db.run(
+        "INSERT INTO user (id, email, name, emailVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)",
+        [user.id, user.email, user.name, 0, now, now]
       );
-      userIds.push(result.lastID as number);
+      userIds.push(user.id);
       console.log(`Created user: ${user.name} (${user.email})`);
     }
 
@@ -147,26 +143,17 @@ async function seedDatabase() {
     }
 
     console.log("Database seeding completed successfully!");
-    console.log("\nSample users created:");
-    console.log("- john@example.com / password123");
-    console.log("- jane@example.com / password123");
-    console.log("- admin@example.com / admin123");
-    console.log("- dev@example.com / dev123");
+    console.log("\nSample users created (sign in through the auth system):");
+    console.log("- john@example.com (John Doe)");
+    console.log("- jane@example.com (Jane Smith)");
+    console.log("- admin@example.com (Admin User)");
+    console.log("- dev@example.com (Developer)");
   } catch (error) {
     console.error("Error seeding database:", error);
     throw error;
   } finally {
     await db.close();
   }
-}
-
-// Install bcrypt if not already installed
-import { execSync } from "child_process";
-try {
-  require.resolve("bcrypt");
-} catch {
-  console.log("Installing bcrypt...");
-  execSync("npm install bcrypt @types/bcrypt", { stdio: "inherit" });
 }
 
 seedDatabase()

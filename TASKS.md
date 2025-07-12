@@ -107,10 +107,6 @@
 - [x] Add responsive design - Mobile-friendly layouts, responsive grid and flexbox
 - [x] Create empty states for no issues/tags - EmptyState, EmptyIssues, EmptySearchResults components
 
-### Data Management
-
-- [ ] Set up API client with proper error handling
-
 ## Integration & Testing
 
 - [ ] Test all CRUD operations

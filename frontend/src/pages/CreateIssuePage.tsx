@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { IssueForm, type IssueFormData } from "@/components/issues";
-import { api } from "@/lib/api";
+import { usersApi, tagsApi, issuesApi } from "@/lib/api";
 import type { User, Tag } from "@/types";
 
 export default function CreateIssuePage() {
@@ -16,16 +16,19 @@ export default function CreateIssuePage() {
     const fetchData = async () => {
       try {
         const [usersResponse, tagsResponse] = await Promise.all([
-          api.get("/users"),
-          api.get("/tags"),
+          usersApi.getUsers(),
+          tagsApi.getTags(),
         ]);
 
+        // API wrapper functions already return the correct structure
         setUsers(usersResponse.data || []);
         setTags(tagsResponse.data || []);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch data:", err);
         setError("Failed to load form data. Please try again.");
+        setUsers([]);
+        setTags([]);
       } finally {
         setLoading(false);
       }
@@ -37,7 +40,7 @@ export default function CreateIssuePage() {
   const handleSubmit = async (data: IssueFormData) => {
     try {
       setSubmitting(true);
-      const response = await api.post("/issues", data);
+      const response = await issuesApi.createIssue(data);
       const newIssue = response.data;
       
       // Navigate to the new issue detail page

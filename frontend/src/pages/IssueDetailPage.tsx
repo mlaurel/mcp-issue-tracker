@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, TagBadge, UserAvatar } from "@/components/common";
-import { api } from "@/lib/api";
+import { issuesApi } from "@/lib/api";
 import type { Issue } from "@/types";
 
 export default function IssueDetailPage() {
@@ -24,7 +24,9 @@ export default function IssueDetailPage() {
       }
 
       try {
-        const response = await api.get(`/issues/${id}`);
+        const response = await issuesApi.getIssue(parseInt(id));
+        console.log("API response:", response);
+        console.log("API response.data:", response.data);
         setIssue(response.data);
         setError(null);
       } catch (err) {
@@ -45,7 +47,7 @@ export default function IssueDetailPage() {
 
     try {
       setDeleteLoading(true);
-      await api.delete(`/issues/${issue.id}`);
+      await issuesApi.deleteIssue(issue.id);
       navigate("/issues");
     } catch (err) {
       console.error("Failed to delete issue:", err);
@@ -199,8 +201,11 @@ export default function IssueDetailPage() {
                   Priority
                 </label>
                 <div className="mt-1">
-                  <Badge className={getPriorityColor(issue.priority)}>
-                    {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
+                  <Badge className={getPriorityColor(issue.priority || 'medium')}>
+                    {issue.priority ? 
+                      issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1) :
+                      'Medium'
+                    }
                   </Badge>
                 </div>
               </div>

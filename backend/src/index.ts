@@ -32,31 +32,45 @@ fastify.register(
     // Create a more direct BetterAuth integration
     fastify.all("/*", async (request, reply) => {
       try {
-        // Create a test request to see what BetterAuth expects
+        // Construct the full URL
         const testUrl = `http://localhost:3000${request.url}`;
 
-        // Try to create the request object
-        const authRequest = new Request(testUrl, {
-          method: request.method,
-          headers: {
-            "content-type": "application/json",
-            ...request.headers,
-          } as any,
-          body: request.body ? JSON.stringify(request.body) : null,
+        // Convert Fastify headers to Headers object
+        const headers = new Headers();
+        Object.entries(request.headers).forEach(([key, value]) => {
+          if (value) {
+            const headerValue = Array.isArray(value) ? value[0] : value;
+            if (typeof headerValue === "string") {
+              headers.set(key, headerValue);
+            }
+          }
         });
 
-        // Call BetterAuth handler directly
+        // Ensure content-type is set for POST requests
+        if (request.method === "POST" && !headers.has("content-type")) {
+          headers.set("content-type", "application/json");
+        }
+
+        // Create the request object for BetterAuth
+        const authRequest = new Request(testUrl, {
+          method: request.method,
+          headers: headers,
+          body:
+            request.method !== "GET" && request.method !== "HEAD"
+              ? JSON.stringify(request.body)
+              : null,
+        });
+
+        // Call BetterAuth handler
         const authResponse = await auth.handler(authRequest);
 
-        // If we get back text content, log it
-        const responseText = authResponse.body
-          ? await authResponse.text()
-          : null;
+        // Get response text
+        const responseText = await authResponse.text();
 
         // Set status
         reply.status(authResponse.status);
 
-        // Copy headers
+        // Copy all headers from auth response
         authResponse.headers.forEach((value, key) => {
           reply.header(key, value);
         });

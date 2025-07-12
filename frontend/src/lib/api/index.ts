@@ -105,6 +105,7 @@ export const issuesApi = {
   createIssue: async (data: {
     title: string;
     description: string;
+    status?: string;
     priority: string;
     assigned_user_id?: string;
     tag_ids?: number[];
