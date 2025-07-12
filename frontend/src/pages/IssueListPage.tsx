@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingState } from "@/components/ui/loading";
 import { IssueCard } from "@/components/issues";
-import { UserAvatar, TagBadge } from "@/components/common";
+import { UserAvatar, TagBadge, EmptyIssues, EmptySearchResults } from "@/components/common";
+import { useToast } from "@/hooks/useToast";
 import { issuesApi, usersApi, tagsApi } from "@/lib/api";
 import type { Issue, User, Tag } from "@/types";
 
@@ -26,6 +28,8 @@ interface IssueFilters {
 
 export default function IssueListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const toast = useToast();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -93,11 +97,13 @@ export default function IssueListPage() {
       setTags(tagsResponse.data || []);
     } catch (err) {
       console.error("Failed to fetch data:", err);
-      setError("Failed to load issues. Please try again.");
+      const errorMessage = "Failed to load issues. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, toast]);
 
   useEffect(() => {
     fetchData();
@@ -114,9 +120,7 @@ export default function IssueListPage() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <div className="text-lg">Loading issues...</div>
-        </div>
+        <LoadingState message="Loading issues..." />
       </div>
     );
   }
@@ -166,10 +170,9 @@ export default function IssueListPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="not_started">Not Started</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="done">Done</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -252,26 +255,11 @@ export default function IssueListPage() {
       {/* Issues list */}
       <div className="space-y-4">
         {issues.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground text-lg mb-4">
-                {hasActiveFilters 
-                  ? "No issues match your current filters." 
-                  : "No issues found."
-                }
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                {hasActiveFilters && (
-                  <Button variant="outline" onClick={clearFilters}>
-                    Clear filters
-                  </Button>
-                )}
-                <Button asChild>
-                  <Link to="/issues/new">Create your first issue</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          hasActiveFilters ? (
+            <EmptySearchResults />
+          ) : (
+            <EmptyIssues onCreateIssue={() => navigate('/issues/new')} />
+          )
         ) : (
           issues.map((issue) => (
             <IssueCard

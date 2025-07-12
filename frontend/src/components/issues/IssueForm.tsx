@@ -9,8 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/ui/loading";
 import TagBadge from "@/components/common/TagBadge";
 import UserAvatar from "@/components/common/UserAvatar";
+import { useToast } from "@/hooks/useToast";
 import type { Issue, User, Tag } from "@/types";
 
 interface IssueFormProps {
@@ -41,6 +43,7 @@ export default function IssueForm({
   isLoading = false,
   className,
 }: IssueFormProps) {
+  const toast = useToast();
   const [formData, setFormData] = useState<IssueFormData>({
     title: issue?.title || "",
     description: issue?.description || "",
@@ -71,12 +74,16 @@ export default function IssueForm({
 
     // Validation
     if (!formData.title.trim()) {
-      setError("Title is required");
+      const errorMsg = "Title is required";
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     if (!formData.description.trim()) {
-      setError("Description is required");
+      const errorMsg = "Description is required";
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -87,8 +94,11 @@ export default function IssueForm({
         assigned_user_id: formData.assigned_user_id === "unassigned" ? undefined : formData.assigned_user_id || undefined,
       };
       await onSubmit(cleanedFormData);
+      toast.success(issue ? "Issue updated successfully!" : "Issue created successfully!");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save issue");
+      const errorMsg = err instanceof Error ? err.message : "Failed to save issue";
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -278,6 +288,7 @@ export default function IssueForm({
               disabled={isLoading || !formData.title.trim() || !formData.description.trim()}
               className="flex-1"
             >
+              {isLoading && <LoadingSpinner size="sm" className="mr-2" />}
               {isLoading 
                 ? (isEditMode ? "Updating..." : "Creating...") 
                 : (isEditMode ? "Update Issue" : "Create Issue")

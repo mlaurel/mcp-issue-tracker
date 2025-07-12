@@ -8,8 +8,7 @@ import type {
   IssueFilters,
 } from "@/types";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Create axios instance with default config
 export const api = axios.create({
