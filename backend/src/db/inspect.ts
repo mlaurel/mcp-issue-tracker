@@ -9,7 +9,7 @@ async function inspectDatabase() {
 
     // Check users
     const users = await db.all(
-      "SELECT id, email, name, created_at FROM users ORDER BY id"
+      "SELECT id, email, name, createdAt FROM user ORDER BY id"
     );
     console.log(`Users (${users.length}):`);
     users.forEach((user) => {
@@ -33,8 +33,8 @@ async function inspectDatabase() {
         assignee.name as assigned_to,
         GROUP_CONCAT(t.name) as tags
       FROM issues i
-      LEFT JOIN users creator ON i.created_by_user_id = creator.id
-      LEFT JOIN users assignee ON i.assigned_user_id = assignee.id
+      LEFT JOIN user creator ON i.created_by_user_id = creator.id
+      LEFT JOIN user assignee ON i.assigned_user_id = assignee.id
       LEFT JOIN issue_tags it ON i.id = it.issue_id
       LEFT JOIN tags t ON it.tag_id = t.id
       GROUP BY i.id

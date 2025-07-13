@@ -37,11 +37,11 @@ describe("Testing Infrastructure", () => {
   it("should create test database users", async () => {
     const user = await createTestDbUser({
       name: "Test User",
-      email: "test@example.com",
+      email: "unique-test-1@example.com",
     });
     expect(user.id).toBeDefined();
     expect(user.name).toBe("Test User");
-    expect(user.email).toBe("test@example.com");
+    expect(user.email).toBe("unique-test-1@example.com");
   });
 
   it("should create test tags", async () => {
@@ -54,16 +54,16 @@ describe("Testing Infrastructure", () => {
   it("should create test issues", async () => {
     const user = await createTestDbUser({
       name: "Test User",
-      email: "test@example.com",
+      email: "unique-test-2@example.com",
     });
     const issue = await createTestIssue({
       title: "Test Issue",
       description: "Test Description",
-      author_id: user.id,
+      created_by_user_id: user.id,
     });
 
     expect(issue.id).toBeDefined();
     expect(issue.title).toBe("Test Issue");
-    expect(issue.author_id).toBe(user.id);
+    expect(issue.created_by_user_id).toBe(user.id);
   });
 });

@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildApp } from "../index.js";
 import {
   createTestDbUser,
   createTestTag,
   createTestIssue,
-  createTestUser,
   mockAuthenticatedRequest,
 } from "./helpers.js";
 import { FastifyInstance } from "fastify";
@@ -13,21 +12,12 @@ import "./setup.js"; // This runs the setup hooks
 describe("Issues API", () => {
   let app: FastifyInstance;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     app = await buildApp({ skipAuth: true });
-
-    // Create a test user for our tests in both tables
-    await createTestDbUser({ name: "Test User", email: "test@example.com" });
-    await createTestUser({
-      id: "test-user-1",
-      name: "Test User",
-      email: "test@example.com",
-    });
-
     await app.ready();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     if (app) {
       await app.close();
     }
@@ -48,7 +38,7 @@ describe("Issues API", () => {
     });
 
     it("should return list of issues", async () => {
-      // Create test issue
+      // Create test issue with the hardcoded user ID that routes expect
       await createTestIssue({
         title: "Test Issue 1",
         created_by_user_id: "test-user-1",
@@ -81,6 +71,11 @@ describe("Issues API", () => {
         url: "/api/issues",
         payload: newIssue,
       });
+
+      if (response.statusCode !== 201) {
+        console.log("Response status:", response.statusCode);
+        console.log("Response payload:", response.payload);
+      }
 
       expect(response.statusCode).toBe(201);
       const data = JSON.parse(response.payload);

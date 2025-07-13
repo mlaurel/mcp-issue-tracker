@@ -1,39 +1,78 @@
 import { FastifyInstance } from "fastify";
 import { testDb } from "./setup.js";
 
-export const createTestUser = async (userData = {}) => {
+export const createTestUser = async (userData: any = {}) => {
+  // Generate unique identifiers to avoid conflicts between tests
+  // But allow override with specific IDs
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000);
+  const uniqueId = userData.id || `test-user-${timestamp}-${random}`;
+  const uniqueEmail =
+    userData.email || `test-${timestamp}-${random}@example.com`;
+
   const defaultUser = {
-    id: "test-user-1",
-    email: "test@example.com",
+    id: uniqueId,
+    email: uniqueEmail,
     name: "Test User",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    emailVerified: 1, // Required field for BetterAuth
+    image: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   const user = { ...defaultUser, ...userData };
 
   await testDb.run(
-    "INSERT INTO user (id, email, name, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)",
-    [user.id, user.email, user.name, user.createdAt, user.updatedAt]
+    "INSERT INTO user (id, email, name, emailVerified, image, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      user.id,
+      user.email,
+      user.name,
+      user.emailVerified,
+      user.image,
+      user.createdAt,
+      user.updatedAt,
+    ]
   );
 
   return user;
 };
 
-export const createTestDbUser = async (userData = {}) => {
+export const createTestDbUser = async (userData: any = {}) => {
+  // Generate unique identifiers to avoid conflicts between tests
+  // But allow override with specific IDs
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000);
+  const uniqueId = userData.id || `test-user-db-${timestamp}-${random}`;
+  const uniqueEmail =
+    userData.email || `test-db-${timestamp}-${random}@example.com`;
+
   const defaultUser = {
+    id: uniqueId,
     name: "Test User",
-    email: "test@example.com",
+    email: uniqueEmail,
+    emailVerified: 1, // Required field for BetterAuth
+    image: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   const user = { ...defaultUser, ...userData };
 
-  const result = await testDb.run(
-    "INSERT INTO users (name, email) VALUES (?, ?)",
-    [user.name, user.email]
+  await testDb.run(
+    "INSERT INTO user (id, name, email, emailVerified, image, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      user.id,
+      user.name,
+      user.email,
+      user.emailVerified,
+      user.image,
+      user.createdAt,
+      user.updatedAt,
+    ]
   );
 
-  return { ...user, id: result.lastID };
+  return user;
 };
 
 export const createTestTag = async (tagData = {}) => {
@@ -52,14 +91,21 @@ export const createTestTag = async (tagData = {}) => {
   return { ...tag, id: result.lastID };
 };
 
-export const createTestIssue = async (issueData = {}) => {
+export const createTestIssue = async (issueData: any = {}) => {
+  // If no created_by_user_id is provided, we'll need to create a user first
+  let userId = issueData.created_by_user_id;
+  if (!userId) {
+    const user = await createTestUser();
+    userId = user.id;
+  }
+
   const defaultIssue = {
     title: "Test Issue",
     description: "Test Description",
     status: "not_started",
     priority: "medium",
     assigned_user_id: null,
-    created_by_user_id: "test-user-1", // Use BetterAuth user ID format
+    created_by_user_id: userId,
   };
 
   const issue = { ...defaultIssue, ...issueData };
@@ -83,10 +129,7 @@ export const mockAuthenticatedRequest = (
   app: FastifyInstance,
   userId: string = "test-user-1"
 ) => {
-  // Override the authMiddleware for tests by replacing it with a mock version
-  app.decorateRequest("user", null);
-
-  // Add a preHandler hook that runs early to set the user context
+  // Add a preHandler hook that runs to set the user context
   app.addHook("onRequest", async (request, reply) => {
     // Skip auth for API routes in tests and set mock user
     if (

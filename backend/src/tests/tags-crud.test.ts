@@ -9,14 +9,6 @@ describe("Tags CRUD Operations", () => {
 
   beforeEach(async () => {
     app = await buildApp({ skipAuth: true });
-
-    // Create test user
-    await createTestUser({
-      id: "test-user-1",
-      name: "Test User",
-      email: "test@example.com",
-    });
-
     await app.ready();
   });
 

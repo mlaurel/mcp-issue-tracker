@@ -55,7 +55,9 @@ export async function createDatabase(): Promise<Database> {
         console.error("Error opening database:", err);
         reject(err);
       } else {
-        console.log("Connected to SQLite database at:", DB_PATH);
+        if (process.env.NODE_ENV !== "test") {
+          console.log("Connected to SQLite database at:", DB_PATH);
+        }
         resolve(new DatabaseConnection(db));
       }
     });
@@ -75,17 +77,23 @@ export async function runMigrations(): Promise<void> {
       .filter((file) => file.endsWith(".sql"))
       .sort();
 
-    console.log("Running database migrations...");
+    if (process.env.NODE_ENV !== "test") {
+      console.log("Running database migrations...");
+    }
 
     for (const file of migrationFiles) {
       const filePath = path.join(migrationsDir, file);
       const sql = fs.readFileSync(filePath, "utf8");
 
-      console.log(`Running migration: ${file}`);
+      if (process.env.NODE_ENV !== "test") {
+        console.log(`Running migration: ${file}`);
+      }
       await db.run(sql);
     }
 
-    console.log("All migrations completed successfully!");
+    if (process.env.NODE_ENV !== "test") {
+      console.log("All migrations completed successfully!");
+    }
   } catch (error) {
     console.error("Error running migrations:", error);
     throw error;

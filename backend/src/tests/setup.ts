@@ -25,12 +25,57 @@ beforeAll(async () => {
 
   // Create tables manually for testing instead of running migrations
   try {
+    // BetterAuth user table (matches actual schema)
     await testDb.run(`
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+      CREATE TABLE IF NOT EXISTS user (
+        id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        emailVerified INTEGER NOT NULL,
+        image TEXT,
+        createdAt DATE NOT NULL,
+        updatedAt DATE NOT NULL
+      )
+    `);
+
+    // BetterAuth session table (matches actual schema)
+    await testDb.run(`
+      CREATE TABLE IF NOT EXISTS session (
+        id TEXT PRIMARY KEY,
+        expiresAt DATE NOT NULL,
+        token TEXT UNIQUE NOT NULL,
+        createdAt DATE NOT NULL,
+        updatedAt DATE NOT NULL,
+        ipAddress TEXT,
+        userAgent TEXT,
+        userId TEXT NOT NULL REFERENCES user(id)
+      )
+    `);
+
+    // BetterAuth account table
+    await testDb.run(`
+      CREATE TABLE IF NOT EXISTS account (
+        id TEXT PRIMARY KEY,
+        accountId TEXT NOT NULL,
+        providerId TEXT NOT NULL,
+        userId TEXT NOT NULL REFERENCES user(id),
+        accessToken TEXT,
+        refreshToken TEXT,
+        expiresAt DATE,
+        createdAt DATE NOT NULL,
+        updatedAt DATE NOT NULL
+      )
+    `);
+
+    // BetterAuth verification table
+    await testDb.run(`
+      CREATE TABLE IF NOT EXISTS verification (
+        id TEXT PRIMARY KEY,
+        identifier TEXT NOT NULL,
+        value TEXT NOT NULL,
+        expiresAt DATE NOT NULL,
+        createdAt DATE NOT NULL,
+        updatedAt DATE
       )
     `);
 
@@ -66,29 +111,6 @@ beforeAll(async () => {
         PRIMARY KEY (issue_id, tag_id),
         FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
         FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      )
-    `);
-
-    // BetterAuth tables
-    await testDb.run(`
-      CREATE TABLE IF NOT EXISTS user (
-        id TEXT PRIMARY KEY,
-        email TEXT UNIQUE NOT NULL,
-        name TEXT NOT NULL,
-        createdAt INTEGER NOT NULL,
-        updatedAt INTEGER NOT NULL
-      )
-    `);
-
-    await testDb.run(`
-      CREATE TABLE IF NOT EXISTS session (
-        id TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        token TEXT UNIQUE NOT NULL,
-        createdAt INTEGER NOT NULL,
-        updatedAt INTEGER NOT NULL,
-        expiresAt INTEGER NOT NULL,
-        FOREIGN KEY (userId) REFERENCES user(id) ON DELETE CASCADE
       )
     `);
 
@@ -142,7 +164,20 @@ beforeEach(async () => {
     await testDb.run("DELETE FROM account");
     await testDb.run("DELETE FROM verification");
     await testDb.run("DELETE FROM user");
-    await testDb.run("DELETE FROM users");
+
+    // Create the default test user that routes expect when skipAuth is enabled
+    await testDb.run(
+      "INSERT INTO user (id, name, email, emailVerified, image, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        "test-user-1",
+        "Test User",
+        "test@example.com",
+        1,
+        null,
+        new Date().toISOString(),
+        new Date().toISOString(),
+      ]
+    );
   } catch (err) {
     // If database is closed, ignore the error since it will be recreated
     if ((err as any).code !== "SQLITE_MISUSE") {

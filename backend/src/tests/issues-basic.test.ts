@@ -17,7 +17,7 @@ describe("Issues API Basic", () => {
   it("should create test user", async () => {
     const user = await createTestDbUser({
       name: "Test User",
-      email: "test@example.com",
+      email: "unique-test@example.com", // Use unique email to avoid conflicts
     });
     expect(user.id).toBeDefined();
     expect(user.name).toBe("Test User");

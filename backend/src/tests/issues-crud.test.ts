@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { buildApp } from "../index.js";
-import {
-  createTestDbUser,
-  createTestTag,
-  createTestIssue,
-  createTestUser,
-} from "./helpers.js";
+import { createTestDbUser, createTestTag, createTestIssue } from "./helpers.js";
 import { FastifyInstance } from "fastify";
 import "./setup.js"; // This runs the setup hooks
 
@@ -14,15 +9,6 @@ describe("Issues CRUD Operations", () => {
 
   beforeEach(async () => {
     app = await buildApp({ skipAuth: true });
-
-    // Create test users in both tables
-    await createTestDbUser({ name: "Test User", email: "test@example.com" });
-    await createTestUser({
-      id: "test-user-1",
-      name: "Test User",
-      email: "test@example.com",
-    });
-
     await app.ready();
   });
 

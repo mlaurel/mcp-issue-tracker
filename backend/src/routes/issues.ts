@@ -266,10 +266,6 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
   fastify.post<{ Body: CreateIssueRequest }>(
     "/",
     async function (request, reply) {
-      console.log("=== DEBUG: Issue creation started ===");
-      console.log("Request body:", request.body);
-      console.log("Request user:", (request as AuthenticatedRequest).user);
-
       try {
         const {
           title,
@@ -356,18 +352,6 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
         }
 
         // Create the issue
-        console.log("=== PRE-INSERT DEBUG ===");
-        const fkCheck = await db.get("PRAGMA foreign_keys");
-        console.log("Foreign keys enabled:", fkCheck);
-
-        // Double-check users exist
-        const userCheck = await db.all(
-          "SELECT id FROM user WHERE id IN (?, ?)",
-          [assigned_user_id || "NULL", currentUser.id]
-        );
-        console.log("Users found:", userCheck);
-        console.log("========================");
-
         const result = await db.run(
           `INSERT INTO issues (title, description, status, assigned_user_id, created_by_user_id, priority) 
          VALUES (?, ?, ?, ?, ?, ?)`,
@@ -456,24 +440,6 @@ const issuesRoute: FastifyPluginAsync = async function (fastify) {
           message: "Issue created successfully",
         });
       } catch (error) {
-        console.log("=== ERROR DETAILS ===");
-        console.log("Error object:", error);
-        console.log(
-          "Error message:",
-          error instanceof Error ? error.message : "Unknown error"
-        );
-        console.log(
-          "Error stack:",
-          error instanceof Error ? error.stack : "No stack"
-        );
-        console.log("Error type:", typeof error);
-        console.log("Request body:", JSON.stringify(request.body, null, 2));
-        console.log(
-          "User:",
-          JSON.stringify((request as AuthenticatedRequest).user, null, 2)
-        );
-        console.log("====================");
-
         fastify.log.error("Error creating issue:", error);
         return reply.status(500).send({
           success: false,

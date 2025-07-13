@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { buildApp } from "../index.js";
 import { createTestUser, createTestTag, createTestIssue } from "./helpers.js";
 import { FastifyInstance } from "fastify";
+import { Issue, PaginatedResponse } from "../types/api.js";
 import "./setup.js";
 
 describe("Issues Filtering and Search", () => {
@@ -126,11 +127,11 @@ describe("Issues Filtering and Search", () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const data = JSON.parse(response.payload);
+      const data: PaginatedResponse<Issue> = JSON.parse(response.payload);
       expect(data.success).toBe(true);
       expect(data.data).toHaveLength(2); // "Fix login button" and "Critical bug in payment"
 
-      data.data.forEach((issue: any) => {
+      data.data.forEach((issue: Issue) => {
         expect(issue.status).toBe("not_started");
       });
     });

@@ -25,8 +25,6 @@ export default function IssueDetailPage() {
 
       try {
         const response = await issuesApi.getIssue(parseInt(id));
-        console.log("API response:", response);
-        console.log("API response.data:", response.data);
         setIssue(response.data);
         setError(null);
       } catch (err) {
