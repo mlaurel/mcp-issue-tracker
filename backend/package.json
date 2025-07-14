@@ -21,8 +21,8 @@
     "sqlite",
     "issue-tracker"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Brian Holt",
+  "license": "Apache-2.0",
   "dependencies": {
     "@fastify/cors": "^11.0.1",
     "@types/bcrypt": "^5.0.2",

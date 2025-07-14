@@ -23,8 +23,8 @@
     "react",
     "fastify"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Brian Holt",
+  "license": "Apache-2.0",
   "devDependencies": {
     "concurrently": "^9.2.0"
   }
