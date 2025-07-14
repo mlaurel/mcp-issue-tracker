@@ -6,12 +6,12 @@ CREATE TABLE IF NOT EXISTS issues (
     title TEXT NOT NULL,
     description TEXT,
     status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started', 'in_progress', 'done')),
-    assigned_user_id INTEGER,
-    created_by_user_id INTEGER NOT NULL,
+    assigned_user_id TEXT,
+    created_by_user_id TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (assigned_user_id) REFERENCES user(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by_user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
 -- Create indexes for better query performance

@@ -9,8 +9,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Enable verbose mode for debugging
 sqlite3.verbose();
 
-// Database file path
-const DB_PATH = path.join(__dirname, "..", "..", "database.sqlite");
+// Database file path - consistent with auth.ts
+const DB_PATH = path.resolve(__dirname, "..", "..", "database.sqlite");
 
 export interface Database {
   run: (sql: string, params?: any[]) => Promise<sqlite3.RunResult>;

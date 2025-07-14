@@ -5,8 +5,9 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Create the database connection
-const db = new Database(path.join(__dirname, "..", "..", "database.sqlite"));
+// Create the database connection with correct path
+const dbPath = path.resolve(__dirname, "..", "database.sqlite");
+const db = new Database(dbPath);
 
 const authConfig = {
   database: db,

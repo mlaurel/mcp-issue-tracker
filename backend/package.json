@@ -11,6 +11,7 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
     "db:inspect": "tsx src/db/inspect.ts",
+    "db:reset": "rm -f database.sqlite && sqlite3 database.sqlite < better-auth_migrations/2025-07-11T02-30-51.059Z.sql && npm run db:migrate && npm run db:seed",
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui"
