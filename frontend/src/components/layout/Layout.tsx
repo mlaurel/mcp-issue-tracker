@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth, SignOutButton } from "@/components/auth";
+import { useAuth, SignOutButton, ApiKeyCopyButton } from "@/components/auth";
 
 interface LayoutProps {
   children: ReactNode;
@@ -51,6 +51,7 @@ export default function Layout({ children }: LayoutProps) {
                   <span className="text-sm text-muted-foreground">
                     Welcome, {user.name}
                   </span>
+                  <ApiKeyCopyButton />
                   <SignOutButton />
                 </div>
               ) : (

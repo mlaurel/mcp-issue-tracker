@@ -110,6 +110,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('Sign out error:', error);
     } finally {
+      // Clear stored API key
+      localStorage.removeItem('userApiKey');
+      
       setAuthState({
         user: null,
         isAuthenticated: false,

@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { apiKey } from "better-auth/plugins";
 import Database from "better-sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,10 +21,20 @@ const authConfig = {
     "http://localhost:5174",
     "http://localhost:3000",
   ],
+  plugins: [
+    apiKey({
+      defaultPrefix: "issues_",
+      enableMetadata: true,
+    }),
+  ],
 };
 
-// Create auth instance and export its handler
+// Create auth instance
 const authInstance = betterAuth(authConfig);
+
+// Add event handlers after creating the instance
+// Note: In Better Auth 1.3.x, events might need to be handled differently
+// For now, we'll use a hook-based approach in the sign-up endpoint
 
 export const auth = {
   handler: authInstance.handler,

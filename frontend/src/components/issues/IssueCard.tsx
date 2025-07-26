@@ -52,7 +52,16 @@ export default function IssueCard({
   
   // Format date for display
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    if (!dateString) return "Invalid Date";
+    
+    // Handle SQLite datetime format (YYYY-MM-DD HH:MM:SS)
+    // Add 'T' to make it ISO format if it's missing
+    const isoDateString = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
+    
+    const date = new Date(isoDateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+    
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -125,7 +134,7 @@ export default function IssueCard({
             <div className="flex items-center gap-2">
               <span>#{issue.id}</span>
               <span>•</span>
-              <span>{formatDate(issue.createdAt)}</span>
+              <span>{formatDate(issue.created_at)}</span>
             </div>
           </div>
           

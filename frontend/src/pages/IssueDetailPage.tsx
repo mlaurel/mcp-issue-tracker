@@ -56,7 +56,16 @@ export default function IssueDetailPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    if (!dateString) return "Invalid Date";
+    
+    // Handle SQLite datetime format (YYYY-MM-DD HH:MM:SS)
+    // Add 'T' to make it ISO format if it's missing
+    const isoDateString = dateString.includes('T') ? dateString : dateString.replace(' ', 'T');
+    
+    const date = new Date(isoDateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+    
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -123,7 +132,7 @@ export default function IssueDetailPage() {
           <div>
             <h1 className="text-2xl font-bold">Issue #{issue.id}</h1>
             <p className="text-muted-foreground">
-              Created {formatDate(issue.createdAt)}
+              Created {formatDate(issue.created_at)}
             </p>
           </div>
         </div>
@@ -236,14 +245,14 @@ export default function IssueDetailPage() {
                 <label className="text-sm font-medium text-muted-foreground">
                   Created
                 </label>
-                <p className="text-sm mt-1">{formatDate(issue.createdAt)}</p>
+                <p className="text-sm mt-1">{formatDate(issue.created_at)}</p>
               </div>
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
                   Last Updated
                 </label>
-                <p className="text-sm mt-1">{formatDate(issue.updatedAt)}</p>
+                <p className="text-sm mt-1">{formatDate(issue.updated_at)}</p>
               </div>
             </CardContent>
           </Card>

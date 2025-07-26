@@ -52,6 +52,16 @@ export const authApi = {
     const response = await api.get("/auth/get-session");
     return response.data;
   },
+
+  getApiKeys: async () => {
+    const response = await api.get("/auth/api-key/list");
+    return response.data;
+  },
+
+  generateNewApiKey: async () => {
+    const response = await api.post("/auth/generate-api-key");
+    return response.data;
+  },
 };
 
 // Users API
